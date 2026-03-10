@@ -6,7 +6,7 @@ pipeline {
         stage('Checkout from GitHub') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/Vardhangollapalli87/node-k8s-app.git'
+                    url: 'https://github.com/Vardhangollapalli87/my-automation-app'
             }
         }
 
@@ -19,15 +19,15 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                docker build -t my-k8s-app:${BUILD_NUMBER} .
-                docker tag my-k8s-app:${BUILD_NUMBER} <docker-username>/my-k8s-app:${BUILD_NUMBER}
+                docker build -t my-automation-app:${BUILD_NUMBER} .
+                docker tag my-automation-app:${BUILD_NUMBER} vardhangollapalli/my-automation-app:${BUILD_NUMBER}
                 '''
             }
         }
 
         stage('Push Docker Image') {
             environment {
-                DOCKER_IMAGE = "<docker-username>/my-k8s-app:${BUILD_NUMBER}"
+                DOCKER_IMAGE = "vardhangollapalli/my-automation-app:${BUILD_NUMBER}"
                 REGISTRY_CREDENTIALS = credentials('docker')
             }
             steps {
@@ -47,7 +47,7 @@ pipeline {
         sh '''
         if ! minikube status | grep -q "apiserver: Running"; then
             echo "Minikube is not running. Starting now..."
-            minikube start --driver=virtualbox
+            minikube start --driver=docker
         fi
         '''
     }
@@ -60,7 +60,7 @@ pipeline {
                 sed -i "s/IMAGE_TAG/${BUILD_NUMBER}/g" k8s/deployment.yaml
 
                 # Load image into Minikube
-                minikube image load <docker-username>/my-k8s-app:${BUILD_NUMBER}
+                minikube image load vardhangollapalli/my-automation-app:${BUILD_NUMBER}
 
                 # Apply manifests
                 kubectl apply -f k8s/deployment.yaml
