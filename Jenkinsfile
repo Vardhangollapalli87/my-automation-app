@@ -6,7 +6,7 @@ pipeline {
         stage('Checkout from GitHub') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/<username>/node-k8s-app.git'
+                    url: 'https://github.com/Vardhangollapalli87/node-k8s-app.git'
             }
         }
 
