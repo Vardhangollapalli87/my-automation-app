@@ -24,20 +24,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-k8s-app-deployment
+  name: my-automation-app-deployment
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: my-k8s-app
+      app: my-automation-app
   template:
     metadata:
       labels:
-        app: my-k8s-app
+        app: my-automation-app
     spec:
       containers:
-      - name: my-k8s-app
-        image: vardhangollapalli/my-k8-app:v1  # your Docker Hub image
-        imagePullPolicy: IfNotPresent
+      - name: my-automation-app
+        image: vardhangollapalli/my-automation-app:IMAGE_TAG  # your Docker Hub image
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
