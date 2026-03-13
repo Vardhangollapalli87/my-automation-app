@@ -176,15 +176,12 @@
 // }
 
 
-
-
-
 pipeline {
     agent any
 
     environment {
         IMAGE_NAME = "vardhangollapalli/my-automation-app"
-        KUBECONFIG = "/home/jenkins/.kube/config"   // adjust if your kubeconfig is elsewhere
+        KUBECONFIG = "/c/Users/vardh/.kube/config"
     }
 
     stages {
@@ -223,10 +220,25 @@ pipeline {
             }
         }
 
+        stage('Check Minikube') {
+            steps {
+                sh '''
+                if minikube status | grep -q "apiserver: Running"; then
+                    echo "Minikube is running"
+                else
+                    echo "Minikube not running, starting..."
+                    minikube start --driver=docker
+                fi
+                '''
+            }
+        }
+
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
+                export KUBECONFIG=/c/Users/vardh/.kube/config
                 kubectl config use-context minikube
+
                 kubectl set image deployment/my-automation-app-deployment \
                 my-automation-app=$IMAGE_NAME:$BUILD_NUMBER
                 '''
@@ -236,6 +248,8 @@ pipeline {
         stage('Show Application URL') {
             steps {
                 sh '''
+                export KUBECONFIG=/c/Users/vardh/.kube/config
+
                 MINIKUBE_IP=$(minikube ip)
                 NODE_PORT=$(kubectl get svc my-automation-app-service -o jsonpath="{.spec.ports[0].nodePort}")
 
