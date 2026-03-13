@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
     res.type('html');
-    res.send("<h1>HELLO FROM A_Z AUTOMATION</h1>");
+    res.send("<h1>HELLO FROM A_Z AUTOMATION</h1><h2>Welcome to our automation app!</h2>");
 });
 
 app.listen(PORT, () => {
