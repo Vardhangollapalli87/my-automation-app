@@ -119,6 +119,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 bat """
+                set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
                 kubectl set image deployment/my-automation-app-deployment ^
                 my-automation-app=%IMAGE_NAME%:%BUILD_NUMBER%
                 """
