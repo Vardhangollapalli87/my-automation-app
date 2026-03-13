@@ -220,25 +220,10 @@ pipeline {
             }
         }
 
-        stage('Check Minikube') {
-            steps {
-                sh '''
-                if minikube status | grep -q "apiserver: Running"; then
-                    echo "Minikube is running"
-                else
-                    echo "Minikube not running, starting..."
-                    minikube start --driver=docker
-                fi
-                '''
-            }
-        }
-
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
                 export KUBECONFIG=/c/Users/vardh/.kube/config
-                kubectl config use-context minikube
-
                 kubectl set image deployment/my-automation-app-deployment \
                 my-automation-app=$IMAGE_NAME:$BUILD_NUMBER
                 '''
