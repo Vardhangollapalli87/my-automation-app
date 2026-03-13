@@ -153,13 +153,21 @@ pipeline {
 
         stage('Show Application URL') {
             steps {
+                // bat """
+                // set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
+                // echo ========================================
+                // echo Application deployed successfully
+                // echo Access your app at:
+                // minikube service my-automation-app-service --url
+                // echo ========================================
+                // """
+
                 bat """
-                set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
-                echo ========================================
-                echo Application deployed successfully
-                echo Access your app at:
-                minikube service my-automation-app-service --url
-                echo ========================================
+                    echo ========================================
+                    echo Application deployed successfully
+                    echo Access your Node app at:
+                    echo http://192.168.49.2:32000
+                    echo ========================================
                 """
             }
         }
