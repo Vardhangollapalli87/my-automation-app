@@ -125,5 +125,17 @@ pipeline {
             }
         }
 
+        stage('Show Application URL') {
+            steps {
+                bat """
+                echo ========================================
+                echo Application deployed successfully
+                echo Access your app at:
+                minikube service my-automation-app-service --url
+                echo ========================================
+                """
+            }
+        }
+
     }
 }
