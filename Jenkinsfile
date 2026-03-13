@@ -73,11 +73,118 @@
 
 
 
+// pipeline {
+//     agent any
+
+//     environment {
+//         IMAGE_NAME = "vardhangollapalli/my-automation-app"
+//     }
+
+//     stages {
+
+//         stage('Checkout from GitHub') {
+//             steps {
+//                 git branch: 'main',
+//                     url: 'https://github.com/Vardhangollapalli87/my-automation-app'
+//             }
+//         }
+
+//         stage('Install Dependencies') {
+//             steps {
+//                 bat 'npm install'
+//             }
+//         }
+
+//         stage('Build Docker Image') {
+//             steps {
+//                 bat """
+//                 docker build -t %IMAGE_NAME%:%BUILD_NUMBER% .
+//                 docker tag %IMAGE_NAME%:%BUILD_NUMBER% %IMAGE_NAME%:latest
+//                 """
+//             }
+//         }
+
+//         stage('Push Docker Image') {
+//             steps {
+//                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+//                     bat """
+//                     docker login -u %USER% -p %PASS%
+//                     docker push %IMAGE_NAME%:%BUILD_NUMBER%
+//                     docker push %IMAGE_NAME%:latest
+//                     """
+//                 }
+//             }
+//         }
+
+//         // stage('Deploy to Kubernetes') {
+//         //     steps {
+//         //         bat """
+//         //         set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
+//         //         kubectl set image deployment/my-automation-app-deployment ^
+//         //         my-automation-app=%IMAGE_NAME%:%BUILD_NUMBER%
+//         //         """
+//         //     }
+//         // }
+
+//         // stage('Show Application URL') {
+//         //     steps {
+//         //         bat """
+//         //         echo ========================================
+//         //         echo Application deployed successfully
+//         //         echo Access your app at:
+//         //         minikube service my-automation-app-service --url
+//         //         echo ========================================
+//         //         """
+//         //     }
+//         // }
+
+
+
+//         stage('Deploy to Kubernetes') {
+//             steps {
+//                 bat """
+//                 set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
+//                 kubectl config use-context minikube
+//                 kubectl set image deployment/my-automation-app-deployment ^
+//                 my-automation-app=%IMAGE_NAME%:%BUILD_NUMBER%
+//                 """
+//             }
+//         }
+
+//         stage('Show Application URL') {
+//             steps {
+//                 // bat """
+//                 // set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
+//                 // echo ========================================
+//                 // echo Application deployed successfully
+//                 // echo Access your app at:
+//                 // minikube service my-automation-app-service --url
+//                 // echo ========================================
+//                 // """
+
+//                 bat """
+//                     echo ========================================
+//                     echo Application deployed successfully
+//                     echo Access your Node app at:
+//                     echo http://192.168.49.2:32000
+//                     echo ========================================
+//                 """
+//             }
+//         }
+
+//     }
+// }
+
+
+
+
+
 pipeline {
     agent any
 
     environment {
         IMAGE_NAME = "vardhangollapalli/my-automation-app"
+        KUBECONFIG = "/home/jenkins/.kube/config"   // adjust if your kubeconfig is elsewhere
     }
 
     stages {
@@ -91,86 +198,54 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                bat 'npm install'
+                sh 'npm install'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                bat """
-                docker build -t %IMAGE_NAME%:%BUILD_NUMBER% .
-                docker tag %IMAGE_NAME%:%BUILD_NUMBER% %IMAGE_NAME%:latest
-                """
+                sh '''
+                docker build -t $IMAGE_NAME:$BUILD_NUMBER .
+                docker tag $IMAGE_NAME:$BUILD_NUMBER $IMAGE_NAME:latest
+                '''
             }
         }
 
         stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    bat """
-                    docker login -u %USER% -p %PASS%
-                    docker push %IMAGE_NAME%:%BUILD_NUMBER%
-                    docker push %IMAGE_NAME%:latest
-                    """
+                    sh '''
+                    echo $PASS | docker login -u $USER --password-stdin
+                    docker push $IMAGE_NAME:$BUILD_NUMBER
+                    docker push $IMAGE_NAME:latest
+                    '''
                 }
             }
         }
 
-        // stage('Deploy to Kubernetes') {
-        //     steps {
-        //         bat """
-        //         set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
-        //         kubectl set image deployment/my-automation-app-deployment ^
-        //         my-automation-app=%IMAGE_NAME%:%BUILD_NUMBER%
-        //         """
-        //     }
-        // }
-
-        // stage('Show Application URL') {
-        //     steps {
-        //         bat """
-        //         echo ========================================
-        //         echo Application deployed successfully
-        //         echo Access your app at:
-        //         minikube service my-automation-app-service --url
-        //         echo ========================================
-        //         """
-        //     }
-        // }
-
-
-
         stage('Deploy to Kubernetes') {
             steps {
-                bat """
-                set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
+                sh '''
                 kubectl config use-context minikube
-                kubectl set image deployment/my-automation-app-deployment ^
-                my-automation-app=%IMAGE_NAME%:%BUILD_NUMBER%
-                """
+                kubectl set image deployment/my-automation-app-deployment \
+                my-automation-app=$IMAGE_NAME:$BUILD_NUMBER
+                '''
             }
         }
 
         stage('Show Application URL') {
             steps {
-                // bat """
-                // set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
-                // echo ========================================
-                // echo Application deployed successfully
-                // echo Access your app at:
-                // minikube service my-automation-app-service --url
-                // echo ========================================
-                // """
+                sh '''
+                MINIKUBE_IP=$(minikube ip)
+                NODE_PORT=$(kubectl get svc my-automation-app-service -o jsonpath="{.spec.ports[0].nodePort}")
 
-                bat """
-                    echo ========================================
-                    echo Application deployed successfully
-                    echo Access your Node app at:
-                    echo http://192.168.49.2:32000
-                    echo ========================================
-                """
+                echo "========================================"
+                echo "Application deployed successfully"
+                echo "Access your Node app at:"
+                echo "http://$MINIKUBE_IP:$NODE_PORT"
+                echo "========================================"
+                '''
             }
         }
-
     }
 }
