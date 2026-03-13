@@ -116,10 +116,35 @@ pipeline {
             }
         }
 
+        // stage('Deploy to Kubernetes') {
+        //     steps {
+        //         bat """
+        //         set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
+        //         kubectl set image deployment/my-automation-app-deployment ^
+        //         my-automation-app=%IMAGE_NAME%:%BUILD_NUMBER%
+        //         """
+        //     }
+        // }
+
+        // stage('Show Application URL') {
+        //     steps {
+        //         bat """
+        //         echo ========================================
+        //         echo Application deployed successfully
+        //         echo Access your app at:
+        //         minikube service my-automation-app-service --url
+        //         echo ========================================
+        //         """
+        //     }
+        // }
+
+
+
         stage('Deploy to Kubernetes') {
             steps {
                 bat """
                 set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
+                kubectl config use-context minikube
                 kubectl set image deployment/my-automation-app-deployment ^
                 my-automation-app=%IMAGE_NAME%:%BUILD_NUMBER%
                 """
@@ -129,6 +154,7 @@ pipeline {
         stage('Show Application URL') {
             steps {
                 bat """
+                set KUBECONFIG=C:\\Users\\vardh\\.kube\\config
                 echo ========================================
                 echo Application deployed successfully
                 echo Access your app at:
