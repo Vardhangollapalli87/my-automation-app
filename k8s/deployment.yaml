@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: my-automation-app
-        image: vardhangollapalli/my-automation-app:IMAGE_TAG  # your Docker Hub image
+        image: vardhangollapalli/my-automation-app:latest  # your Docker Hub image
         imagePullPolicy: Always
         ports:
-        - containerPort: 8080
+        - containerPort: 3000
