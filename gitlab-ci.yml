@@ -1,3 +1,29 @@
+# stages:
+#   - build
+#   - deploy
+
+# variables:
+#   IMAGE_NAME: vardhangollapalli/my-automation-app
+
+# build-image:
+#   stage: build
+#   tags:
+#     - local-runner
+#   script:
+#     - docker build -t ${IMAGE_NAME}:${CI_PIPELINE_ID} .
+#     - echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
+#     - docker push ${IMAGE_NAME}:${CI_PIPELINE_ID}
+
+# deploy-k8s:
+#   stage: deploy
+#   tags:
+#     - local-runner
+#   script:
+#     - kubectl config use-context minikube
+#     - kubectl set image deployment/my-automation-app-deployment my-automation-app=${IMAGE_NAME}:${CI_PIPELINE_ID}
+
+
+
 stages:
   - build
   - deploy
@@ -11,7 +37,7 @@ build-image:
     - local-runner
   script:
     - docker build -t ${IMAGE_NAME}:${CI_PIPELINE_ID} .
-    - echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
+    - echo $env:DOCKER_HUB_PASSWORD | docker login -u $env:DOCKER_HUB_USERNAME --password-stdin
     - docker push ${IMAGE_NAME}:${CI_PIPELINE_ID}
 
 deploy-k8s:
