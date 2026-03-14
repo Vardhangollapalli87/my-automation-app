@@ -45,5 +45,6 @@ deploy-k8s:
   tags:
     - local-runner
   script:
+    - $env:KUBECONFIG="C:\Users\vardh\.kube\config"
     - kubectl config use-context minikube
     - kubectl set image deployment/my-automation-app-deployment my-automation-app=${IMAGE_NAME}:${CI_PIPELINE_ID}
